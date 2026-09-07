@@ -1,0 +1,38 @@
+scenario:
+  id: NETA-LAB-002
+  name: periodic-https-beacon
+  version: 1
+  category: network
+  safety: benign
+
+activity:
+  scheme: https
+  path: /beacon
+  default_port: 18443
+  request_count: 12
+  interval_seconds: 5
+  interval_tolerance_seconds: 1
+  direction: outbound
+  transport: tcp
+  certificate: self_signed_lab_certificate
+
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  remote_endpoint: required
+  periodic_timing: required
+  route: optional
+  tcp_metrics: optional
+  dns: optional
+  tls_session: platform_dependent
+  tls_identity: platform_dependent
+
+expected_findings:
+  - type: PERIODIC_OUTBOUND_CONNECTION
+    minimum_severity: low
+    malicious_intent: unknown
+
+notes:
+  - TLS identity is supporting evidence, not a prerequisite for the periodicity finding.
+  - Lab HTTP headers and run IDs are ground-truth markers only and must not be used by NETA detection rules.
+  - Client certificate verification is disabled only because this scenario uses a controlled self-signed lab certificate.

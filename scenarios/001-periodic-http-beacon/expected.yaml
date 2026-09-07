@@ -1,0 +1,34 @@
+scenario:
+  id: NETA-LAB-001
+  name: periodic-http-beacon
+  version: 1
+  category: network
+  safety: benign
+
+activity:
+  scheme: http
+  path: /beacon
+  default_port: 18080
+  request_count: 12
+  interval_seconds: 5
+  interval_tolerance_seconds: 1
+  direction: outbound
+  transport: tcp
+
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  remote_endpoint: required
+  periodic_timing: required
+  route: optional
+  tcp_metrics: optional
+  dns: optional
+  tls: not_applicable
+
+expected_findings:
+  - type: PERIODIC_OUTBOUND_CONNECTION
+    minimum_severity: low
+    malicious_intent: unknown
+
+notes:
+  - Lab HTTP headers and run IDs are ground-truth markers only and must not be used by NETA detection rules.
