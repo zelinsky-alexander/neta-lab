@@ -1,0 +1,42 @@
+scenario:
+  id: NETA-LAB-003
+  name: controlled-large-download
+  version: 1
+  category: network
+  safety: benign
+
+activity:
+  protocol: http
+  transport: tcp
+  direction: outbound
+  connection_count: 1
+  payload_bytes: 52428800
+  payload_mib: 50
+
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  remote_endpoint: required
+  cumulative_received_bytes: required_for_full_pass
+  tcp_metrics: optional
+  route: optional
+  dns: optional
+  tls: not_applicable
+
+expected_findings:
+  - type: LARGE_INGRESS_TRANSFER
+    minimum_severity: low
+    malicious_intent: unknown
+    requires_capability: cumulative_received_bytes
+
+validation:
+  received_bytes_tolerance_percent: 1
+  do_not_use_as_substitute:
+    - recv_queue_bytes
+    - send_queue_bytes
+  unsupported_if_missing:
+    - cumulative_received_bytes
+
+notes:
+  - Lab markers identify independent ground truth only and must not be used by detection rules.
+  - The detector threshold should be independent of the 50 MiB lab payload; 32 MiB is a suitable initial threshold.

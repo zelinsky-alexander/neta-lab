@@ -14,8 +14,9 @@ Each scenario lives in a dedicated numbered folder and defines:
 
 - `NETA-LAB-001` — periodic HTTP beacon
 - `NETA-LAB-002` — periodic HTTPS beacon
+- `NETA-LAB-003` — controlled large download
 
-Both scenarios are intentionally benign. They generate repeated outbound connections to infrastructure you control; they do not exploit software, establish persistence, steal credentials, or execute downloaded payloads.
+All scenarios are intentionally benign. They generate controlled endpoint/network behavior against infrastructure you own; they do not exploit software, establish persistence, steal credentials, or execute downloaded payloads.
 
 ## Repository policy
 
@@ -27,8 +28,9 @@ Open the README under the scenario you want to run:
 
 - [`scenarios/001-periodic-http-beacon/`](scenarios/001-periodic-http-beacon/)
 - [`scenarios/002-periodic-https-beacon/`](scenarios/002-periodic-https-beacon/)
+- [`scenarios/003-large-download/`](scenarios/003-large-download/)
 
-For the first end-to-end NETA validation, use the HTTP scenario because it has the fewest environmental dependencies. Use HTTPS next to exercise TLS-aware evidence where the platform supports it.
+For the first end-to-end NETA validation, use the HTTP beacon because it has the fewest environmental dependencies. Use HTTPS next to exercise TLS-aware evidence where the platform supports it. Use the large-download scenario to validate cumulative transfer-volume evidence and `LARGE_INGRESS_TRANSFER` detection once that agent capability is available.
 
 ## Safety
 
