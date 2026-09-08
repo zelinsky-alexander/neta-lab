@@ -15,8 +15,9 @@ Each scenario lives in a dedicated numbered folder and defines:
 - `NETA-LAB-001` — periodic HTTP beacon
 - `NETA-LAB-002` — periodic HTTPS beacon
 - `NETA-LAB-003` — controlled large download
+- `NETA-LAB-004` — safe TerminalFix/ClickFix-style Windows download/execute/network chain
 
-All scenarios are intentionally benign. They generate controlled endpoint/network behavior against infrastructure you own; they do not exploit software, establish persistence, steal credentials, or execute downloaded payloads.
+All scenarios are intentionally benign. They generate controlled endpoint/network behavior against infrastructure you own; they do not exploit software, steal credentials, or execute malicious payloads. Scenarios that emulate later-stage EDR behaviors may create explicitly documented temporary lab artifacts, but must remain bounded and reversible.
 
 ## Repository policy
 
@@ -29,8 +30,9 @@ Open the README under the scenario you want to run:
 - [`scenarios/001-periodic-http-beacon/`](scenarios/001-periodic-http-beacon/)
 - [`scenarios/002-periodic-https-beacon/`](scenarios/002-periodic-https-beacon/)
 - [`scenarios/003-large-download/`](scenarios/003-large-download/)
+- [`scenarios/004-terminalfix-style-chain/`](scenarios/004-terminalfix-style-chain/)
 
-For the first end-to-end NETA validation, use the HTTP beacon because it has the fewest environmental dependencies. Use HTTPS next to exercise TLS-aware evidence where the platform supports it. Use the large-download scenario to validate cumulative transfer-volume evidence and `LARGE_INGRESS_TRANSFER` detection once that agent capability is available.
+For the first end-to-end NETA validation, use the HTTP beacon because it has the fewest environmental dependencies. Use HTTPS next to exercise TLS-aware evidence where the platform supports it. Use the large-download scenario to validate cumulative transfer-volume evidence and `LARGE_INGRESS_TRANSFER` detection once that agent capability is available. Use NETA-LAB-004 when validating Windows process ancestry, file/artifact evidence, download-to-execution causality, and correlated endpoint detection.
 
 ## Safety
 
@@ -38,4 +40,4 @@ Run scenarios only against systems and endpoints you own or are explicitly autho
 
 ## Licensing
 
-Project-authored content is licensed under the MIT License. The scenarios use only operating-system tools and Python standard-library functionality; no third-party source code is vendored into this repository.
+Project-authored content is licensed under the MIT License. The scenarios use only operating-system tools, platform runtime libraries, and Python standard-library functionality; no third-party source code is vendored into this repository.

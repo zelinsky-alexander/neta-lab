@@ -1,0 +1,77 @@
+scenario:
+  id: NETA-LAB-004
+  name: terminalfix-style-chain
+  version: 1
+  category: endpoint-chain
+  platform: windows
+  safety: benign
+
+activity:
+  launcher: cmd.exe
+  script_process: powershell.exe
+  downloader: curl.exe
+  downloaded_artifact: neta-lab-004-payload.exe
+  protocol: https
+  transport: tcp
+  callback_count: 1
+  persistence: false
+  credential_access: false
+  command_and_control: simulated_behavior_only
+
+expected_evidence:
+  process_lifecycle: required
+  parent_child_chain: required
+  file_creation: required
+  executable_path: required
+  executable_sha256: required
+  dns: required_for_full_pass
+  connection_lifecycle: required
+  process_attribution: required
+  tls_identity: required_for_full_pass
+  user_logon_identity: optional
+  signer_state: optional
+  route: optional
+  tcp_metrics: optional
+  first_seen_artifact: optional
+
+expected_parent_chain:
+  - parent: cmd.exe
+    child: powershell.exe
+  - parent: powershell.exe
+    child: neta-lab-004-payload.exe
+
+expected_findings:
+  - type: SCRIPTED_DOWNLOAD_EXECUTE_NETWORK_CHAIN
+    minimum_severity: medium
+    malicious_intent: unknown
+    requires_capabilities:
+      - process_lifecycle
+      - parent_child_chain
+      - file_creation
+      - executable_sha256
+      - process_attribution
+      - connection_lifecycle
+
+validation:
+  detection_must_not_depend_on:
+    - scenario_id
+    - lab_http_headers
+    - run_id
+    - payload_filename
+    - callback_path
+    - server_ground_truth_log
+  unsupported_if_missing:
+    - process_lifecycle
+    - parent_child_chain
+    - file_creation
+    - executable_sha256
+    - process_attribution
+    - connection_lifecycle
+  full_pass_also_requires:
+    - dns
+    - tls_identity
+
+notes:
+  - The downloaded executable is built from NETA-owned source and performs only one HTTPS GET to the configured lab server.
+  - Lab markers provide independent ground truth only and must never become detector features.
+  - Missing endpoint evidence remains UNKNOWN/UNAVAILABLE rather than being inferred from the lab script.
