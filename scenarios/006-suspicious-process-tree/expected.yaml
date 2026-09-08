@@ -1,0 +1,99 @@
+scenario:
+  id: NETA-LAB-006
+  name: suspicious-process-tree-masquerading-chain
+  version: 1
+  category: endpoint-process
+  platform: windows
+  safety: benign
+
+activity:
+  launcher: cmd.exe
+  orchestrator: powershell.exe
+  source_executable: "%SystemRoot%\\System32\\cmd.exe"
+  copied_executable_name: windows-update-helper.exe
+  copied_executable_location: user_writable_temp
+  child_processes:
+    - whoami.exe
+    - hostname.exe
+    - ipconfig.exe
+  network_required: false
+  executable_download: false
+  process_injection: false
+  persistence: false
+  privilege_transition: false
+  credential_access: false
+
+expected_evidence:
+  process_lifecycle: required
+  parent_child_chain: required
+  command_line: required
+  file_creation: required
+  executable_path: required
+  executable_sha256: required
+  signer_state: required_for_full_pass
+  signer_identity: required_for_full_pass
+  original_filename_identity: optional
+  first_seen_artifact: optional
+  user_logon_identity: optional
+  file_metadata: optional
+  connection_lifecycle: not_applicable
+  dns: not_applicable
+  tls_identity: not_applicable
+
+expected_parent_chain:
+  - parent: cmd.exe
+    child: powershell.exe
+  - parent: powershell.exe
+    child: windows-update-helper.exe
+  - parent: windows-update-helper.exe
+    child: whoami.exe
+  - parent: windows-update-helper.exe
+    child: hostname.exe
+  - parent: windows-update-helper.exe
+    child: ipconfig.exe
+
+expected_identity_relationship:
+  source_and_copy_sha256_equal: true
+  copied_path_is_nonstandard: true
+  copied_filename_differs_from_original: true
+  trusted_signature_may_remain_valid: true
+
+expected_findings:
+  - type: RENAMED_SYSTEM_BINARY_PROCESS_TREE
+    minimum_severity: medium
+    malicious_intent: unknown
+    requires_capabilities:
+      - process_lifecycle
+      - parent_child_chain
+      - command_line
+      - file_creation
+      - executable_path
+      - executable_sha256
+
+validation:
+  signer_is_context_not_suppression:
+    signer_is_evidence_not_allowlist: true
+    valid_signature_must_not_suppress_contextual_finding: true
+  detection_must_not_depend_on:
+    - scenario_id
+    - run_id
+    - exact_temporary_directory
+    - exact_copied_filename
+    - exact_output_filenames
+    - lab_console_ground_truth
+  unsupported_if_missing:
+    - process_lifecycle
+    - parent_child_chain
+    - command_line
+    - file_creation
+    - executable_path
+    - executable_sha256
+  full_pass_also_requires:
+    - signer_state
+    - signer_identity
+
+notes:
+  - The copied executable is the legitimate local Windows cmd.exe and is not modified.
+  - The copied binary hash should match the source cmd.exe hash exactly.
+  - The suspicious signal is contextual: trusted binary identity plus unusual path/name plus process ancestry and child-process behavior.
+  - Network activity is deliberately absent so this scenario validates process-centric detection independently.
