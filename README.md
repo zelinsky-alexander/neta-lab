@@ -16,6 +16,7 @@ Each scenario lives in a dedicated numbered folder and defines:
 - `NETA-LAB-002` — periodic HTTPS beacon
 - `NETA-LAB-003` — controlled large download
 - `NETA-LAB-004` — safe TerminalFix/ClickFix-style Windows download/execute/network chain
+- `NETA-LAB-005` — safe Windows LOLBin staging chain using signed system utilities
 
 All scenarios are intentionally benign. They generate controlled endpoint/network behavior against infrastructure you own; they do not exploit software, steal credentials, or execute malicious payloads. Scenarios that emulate later-stage EDR behaviors may create explicitly documented temporary lab artifacts, but must remain bounded and reversible.
 
@@ -31,8 +32,9 @@ Open the README under the scenario you want to run:
 - [`scenarios/002-periodic-https-beacon/`](scenarios/002-periodic-https-beacon/)
 - [`scenarios/003-large-download/`](scenarios/003-large-download/)
 - [`scenarios/004-terminalfix-style-chain/`](scenarios/004-terminalfix-style-chain/)
+- [`scenarios/005-lolbin-chain/`](scenarios/005-lolbin-chain/)
 
-For the first end-to-end NETA validation, use the HTTP beacon because it has the fewest environmental dependencies. Use HTTPS next to exercise TLS-aware evidence where the platform supports it. Use the large-download scenario to validate cumulative transfer-volume evidence and `LARGE_INGRESS_TRANSFER` detection once that agent capability is available. Use NETA-LAB-004 when validating Windows process ancestry, file/artifact evidence, download-to-execution causality, and correlated endpoint detection.
+For the first end-to-end NETA validation, use the HTTP beacon because it has the fewest environmental dependencies. Use HTTPS next to exercise TLS-aware evidence where the platform supports it. Use the large-download scenario to validate cumulative transfer-volume evidence and `LARGE_INGRESS_TRANSFER` detection once that agent capability is available. Use NETA-LAB-004 when validating Windows process ancestry, file/artifact evidence, download-to-execution causality, and correlated endpoint detection. Use NETA-LAB-005 to validate that signer trust is preserved as evidence without suppressing suspicious behavior performed by legitimate signed system utilities.
 
 ## Safety
 

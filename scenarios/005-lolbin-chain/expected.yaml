@@ -1,0 +1,86 @@
+scenario:
+  id: NETA-LAB-005
+  name: lolbin-staging-chain
+  version: 1
+  category: endpoint-chain
+  platform: windows
+  safety: benign
+
+activity:
+  launcher: cmd.exe
+  script_process: powershell.exe
+  system_utility: certutil.exe
+  operations:
+    - controlled_http_download
+    - base64_encode
+    - base64_decode
+    - controlled_http_callback
+  downloaded_content_type: text/plain
+  executable_download: false
+  execution_of_downloaded_content: false
+  persistence: false
+  credential_access: false
+  privilege_transition: false
+
+expected_evidence:
+  process_lifecycle: required
+  parent_child_chain: required
+  command_line: required
+  file_creation: required
+  executable_path: required
+  file_sha256: optional
+  signer_state: required_for_full_pass
+  signer_identity: required_for_full_pass
+  connection_lifecycle: required
+  process_attribution: required
+  dns: optional
+  route: optional
+  tcp_metrics: optional
+  first_seen_artifact: optional
+
+expected_parent_chain:
+  - parent: cmd.exe
+    child: powershell.exe
+  - parent: powershell.exe
+    child: certutil.exe
+
+expected_findings:
+  - type: SIGNED_SYSTEM_UTILITY_STAGING_CHAIN
+    minimum_severity: medium
+    malicious_intent: unknown
+    requires_capabilities:
+      - process_lifecycle
+      - parent_child_chain
+      - command_line
+      - file_creation
+      - connection_lifecycle
+      - process_attribution
+
+validation:
+  signed_software_rule:
+    signer_is_evidence_not_allowlist: true
+    valid_signature_must_not_suppress_behavioral_finding: true
+  detection_must_not_depend_on:
+    - scenario_id
+    - run_id
+    - lab_http_headers
+    - lab_server_paths
+    - exact_temporary_filenames
+    - exact_stage_content
+    - server_ground_truth_log
+  unsupported_if_missing:
+    - process_lifecycle
+    - parent_child_chain
+    - command_line
+    - file_creation
+    - connection_lifecycle
+    - process_attribution
+  full_pass_also_requires:
+    - signer_state
+    - signer_identity
+
+notes:
+  - certutil.exe is deliberately used as a legitimate Windows utility exercising supported functionality in an unusual sequence.
+  - The staged object is inert text and is never executed.
+  - NETA must derive signer and behavioral evidence independently of lab ground truth.
+  - A trusted publisher identity does not imply that the observed behavior is safe.
