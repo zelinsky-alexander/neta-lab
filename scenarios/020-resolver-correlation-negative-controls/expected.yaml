@@ -1,0 +1,18 @@
+scenario:
+  id: NETA-LAB-020
+  name: resolver-correlation-negative-controls
+  version: 1
+  category: negative-control
+  platform: linux
+  safety: benign
+subcases:
+  lookup_without_connection:
+    expected_connection_relations: 0
+  unrelated_lookup_near_connection:
+    expected_resolver_connection_relations: 0
+  multiple_candidate_events:
+    correlation_result: AMBIGUOUS_OR_UNKNOWN
+validation:
+  timestamp_proximity_alone_is_insufficient: true
+  ambiguous_match_must_not_be_promoted: true
+expected_findings: []
