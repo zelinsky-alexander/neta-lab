@@ -27,8 +27,16 @@ Each scenario lives in a dedicated numbered folder and defines:
 - `NETA-LAB-016` — inbound TCP accepted connection
 - `NETA-LAB-017` — concurrent inbound + outbound
 - `NETA-LAB-018` — listener negative control
+- `NETA-LAB-019` — resolver-to-connection correlation
+- `NETA-LAB-020` — resolver correlation negative controls
+- `NETA-LAB-021` — TLS stable identity
+- `NETA-LAB-022` — TLS certificate / SPKI rotation
+- `NETA-LAB-023` — TLS transport degradation only
+- `NETA-LAB-024` — TLS identity change only
+- `NETA-LAB-025` — compound TLS identity change + transport degradation
+- `NETA-LAB-031` — TLS evidence fidelity comparison
 
-IDs 011–013 are reserved by the networking/TLS lab matrix for later P1 scenarios and must not be reused.
+IDs 011–013 are reserved by the networking/TLS lab matrix for later P1 scenarios. IDs 026–030 are reserved for Wave D inbound TLS/mTLS. IDs must not be reused.
 
 All scenarios are intentionally benign. They generate controlled endpoint/network behavior against infrastructure you own; they do not exploit software, steal credentials, or execute malicious payloads. Capability and negative-control labs may legitimately expect no security finding.
 
@@ -36,9 +44,15 @@ All scenarios are intentionally benign. They generate controlled endpoint/networ
 
 This repository is intentionally maintained directly on `main` unless a future change explicitly requires another workflow. Scenario IDs are immutable once published.
 
-## Wave B safety
+## Network impairment safety
 
-The Linux latency/loss scenarios create an isolated network namespace and veth pair and apply `tc netem` only to that temporary lab interface. They do not modify the machine's normal network interface. Cleanup removes the namespace automatically.
+Linux impairment scenarios create an isolated network namespace and veth pair and apply `tc netem` only to that temporary lab interface. They do not modify the machine's normal network interface. Cleanup removes the namespace automatically.
+
+## Resolver and TLS semantics
+
+Resolver labs validate application resolver observations and bounded connection correlation; they do not claim that a `getaddrinfo()` event is an exact DNS packet transaction.
+
+TLS labs use short-lived local CA material and OpenSSL application sessions so NETA can validate MS3 exact TLS-session evidence. Supporting probes remain supporting evidence and must never be promoted to exact application-session identity.
 
 Missing platform evidence is a capability gap and must not be fabricated as zero/false/pass.
 
@@ -48,4 +62,4 @@ Run scenarios only against systems and endpoints you own or are explicitly autho
 
 ## Licensing
 
-Project-authored content is licensed under the MIT License. The scenarios use only operating-system tools, platform runtime libraries, and Python standard-library functionality; no third-party source code is vendored into this repository.
+Project-authored content is licensed under the MIT License. The scenarios use only operating-system tools, OpenSSL command-line/runtime functionality already expected by the NETA TLS validation path, and Python standard-library functionality; no third-party source code is vendored into this repository.
