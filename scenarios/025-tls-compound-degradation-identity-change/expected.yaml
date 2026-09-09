@@ -1,0 +1,19 @@
+scenario:
+  id: NETA-LAB-025
+  name: tls-compound-degradation-identity-change
+  version: 1
+  category: tls-assurance
+  platform: linux
+  safety: benign
+controlled_behavior:
+  baseline_identity: A
+  impaired_identity: B
+  netem: 'delay 120ms loss 1%'
+expected_assurance:
+  performance: DEGRADED
+  trust: CHANGED
+expected_findings:
+  - TLS_IDENTITY_CHANGE
+validation:
+  correlation_observed: true
+  causality_between_transport_and_identity_change: NOT_ESTABLISHED
