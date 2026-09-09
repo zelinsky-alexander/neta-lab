@@ -1,0 +1,23 @@
+scenario:
+  id: NETA-LAB-021
+  name: tls-stable-identity
+  version: 1
+  category: tls-assurance
+  platform: linux
+  safety: benign
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  tls_role: required_for_full_pass
+  tls_protocol: required_for_full_pass
+  tls_cipher: required_for_full_pass
+  sni: required_for_full_pass
+  hostname_validation: required_for_full_pass
+  peer_authentication: required_for_full_pass
+  leaf_sha256: required_for_full_pass
+  spki_sha256: required_for_full_pass
+  subject_issuer_validity: required_for_full_pass
+expected_assurance:
+  trust: STABLE_AFTER_BASELINE_ACCEPTANCE
+forbidden_findings:
+  - TLS_IDENTITY_CHANGE
