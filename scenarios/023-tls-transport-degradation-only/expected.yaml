@@ -1,0 +1,17 @@
+scenario:
+  id: NETA-LAB-023
+  name: tls-transport-degradation-only
+  version: 1
+  category: tls-assurance
+  platform: linux
+  safety: benign
+controlled_behavior:
+  tls_identity: stable_A
+  netem: 'delay 120ms loss 1%'
+expected_assurance:
+  performance: DEGRADED
+  trust: STABLE
+forbidden_findings:
+  - TLS_IDENTITY_CHANGE
+validation:
+  transport_degradation_does_not_imply_identity_change: true
