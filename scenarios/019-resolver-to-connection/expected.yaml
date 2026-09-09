@@ -1,0 +1,22 @@
+scenario:
+  id: NETA-LAB-019
+  name: resolver-to-connection
+  version: 1
+  category: network-correlation
+  platform: linux
+  safety: benign
+expected_evidence:
+  resolver_event: required
+  query_name: required
+  resolver_return_code: required
+  resolved_address_set: required
+  resolver_process_identity: required
+  resolver_source_fidelity: required
+  connection_lifecycle: required
+  process_attribution: required
+expected_relations:
+  - RESOLVED_ADDRESS_FOR_OUTBOUND_CONNECTION
+validation:
+  resolver_api_is_not_exact_dns_packet: true
+  ambiguous_correlation_must_not_be_promoted_to_exact: true
+expected_findings: []
