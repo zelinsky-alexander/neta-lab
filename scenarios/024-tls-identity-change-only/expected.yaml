@@ -1,0 +1,17 @@
+scenario:
+  id: NETA-LAB-024
+  name: tls-identity-change-only
+  version: 1
+  category: tls-assurance
+  platform: linux
+  safety: benign
+controlled_behavior:
+  network_impairment: false
+  identity_sequence: [A, B]
+expected_assurance:
+  performance: NORMAL
+  trust: CHANGED
+expected_findings:
+  - TLS_IDENTITY_CHANGE
+validation:
+  identity_change_does_not_imply_transport_degradation: true
