@@ -1,0 +1,24 @@
+scenario:
+  id: NETA-LAB-022
+  name: tls-identity-rotation
+  version: 1
+  category: tls-assurance
+  platform: linux
+  safety: benign
+ground_truth:
+  identity_sequence: [A, B]
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  tls_session: required_for_full_pass
+  tls_identity: required_for_full_pass
+  certificate_validation: required_for_full_pass
+  hostname_validation: required_for_full_pass
+expected_assurance:
+  performance: NORMAL
+  trust: CHANGED
+expected_findings:
+  - TLS_IDENTITY_CHANGE
+forbidden_findings:
+  - PERIODIC_OUTBOUND_CONNECTION
+  - HIGH_OUTBOUND_ASYMMETRY
