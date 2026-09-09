@@ -1,0 +1,23 @@
+scenario:
+  id: NETA-LAB-008
+  name: clean-tcp-baseline
+  version: 1
+  category: network-assurance
+  safety: benign
+activity:
+  default_port: 18448
+  connection_count: 5
+  hold_seconds: 3
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  remote_endpoint: required
+  tcp_rtt: required_for_full_pass
+  tcp_rtt_variance: required_for_full_pass
+  tcp_retransmissions: required_for_full_pass
+  route: required_for_full_pass
+expected_assurance:
+  performance: NORMAL
+expected_findings: []
+negative_control:
+  unexpected_threat_findings_forbidden: true

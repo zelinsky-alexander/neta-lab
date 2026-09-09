@@ -1,0 +1,28 @@
+scenario:
+  id: NETA-LAB-007
+  name: controlled-large-upload-asymmetry
+  version: 1
+  category: network
+  safety: benign
+activity:
+  direction: outbound
+  default_port: 18447
+  upload_bytes: 33554432
+  generated_content: true
+expected_evidence:
+  connection_lifecycle: required
+  process_attribution: required
+  direction: required
+  remote_endpoint: required
+  bytes_sent: required
+  bytes_received: required
+  transfer_fidelity: required
+expected_findings:
+  - type: HIGH_OUTBOUND_ASYMMETRY
+    malicious_intent: unknown
+forbidden_assertions:
+  - data_exfiltration_confirmed
+  - credential_theft
+  - compromised_host
+negative_control:
+  small_upload_must_not_match: true

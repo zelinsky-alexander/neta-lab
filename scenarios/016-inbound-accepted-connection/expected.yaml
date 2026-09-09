@@ -1,0 +1,21 @@
+scenario:
+  id: NETA-LAB-016
+  name: inbound-tcp-accepted-connection
+  version: 1
+  category: network-assurance
+  safety: benign
+activity:
+  direction: inbound
+  default_port: 18456
+expected_evidence:
+  accept_event: required
+  exact_direction: required
+  accepted_socket: required
+  server_process_attribution: required
+  remote_peer: required
+  tcp_metrics: required_for_full_pass
+  response_route: optional
+expected_findings: []
+forbidden:
+  listener_as_connection_history: true
+  suspicious_only_because_inbound: true

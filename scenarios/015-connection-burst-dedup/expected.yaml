@@ -1,0 +1,17 @@
+scenario:
+  id: NETA-LAB-015
+  name: connection-burst-deduplication
+  version: 1
+  category: capability-regression
+  safety: benign
+activity:
+  default_port: 18455
+  connection_count: 1000
+  parallelism: 25
+expected_validation:
+  connection_identity_unique: true
+  duplicate_history_rows: 0
+  phantom_time_wait_rows: 0
+  lifecycle_loss_counter: required
+  storage_growth: report
+expected_findings: []

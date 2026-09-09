@@ -1,0 +1,20 @@
+scenario:
+  id: NETA-LAB-014
+  name: very-short-tcp-lifecycle-coverage
+  version: 1
+  category: capability-regression
+  platform: linux
+  safety: benign
+activity:
+  default_port: 18454
+  connection_count: 100
+  hold_seconds: 0
+expected_evidence:
+  connect_event: required
+  close_event: required
+  process_attribution: required
+  exact_direction: required
+  lifecycle_loss_counter: required
+expected_findings: []
+validation:
+  dropped_lifecycle_events_expected: 0

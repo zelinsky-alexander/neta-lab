@@ -1,0 +1,15 @@
+scenario:
+  id: NETA-LAB-018
+  name: listener-negative-control
+  version: 1
+  category: negative-control
+  safety: benign
+activity:
+  default_port: 18458
+  idle_seconds: 15
+expected_idle_phase:
+  listener_service_metadata: allowed
+  ordinary_connection_history_rows: 0
+expected_connected_phase:
+  accepted_connection_objects: 1
+expected_findings: []

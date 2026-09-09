@@ -1,0 +1,22 @@
+scenario:
+  id: NETA-LAB-010
+  name: packet-loss-retransmission-degradation
+  version: 1
+  category: network-assurance
+  platform: linux
+  safety: isolated_netns
+activity:
+  impairment: netem_loss
+  default_loss: 5%
+expected_evidence:
+  tcp_retransmissions: required
+  tcp_rtt: required_for_full_pass
+  process_attribution: required
+  remote_endpoint: required
+  route: optional
+expected_assurance:
+  performance: DEGRADED
+  trust: STABLE
+expected_findings: []
+forbidden_assertions:
+  - tls_identity_caused_degradation

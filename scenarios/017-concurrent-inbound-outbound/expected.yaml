@@ -1,0 +1,16 @@
+scenario:
+  id: NETA-LAB-017
+  name: concurrent-inbound-outbound
+  version: 1
+  category: network-assurance
+  platform: linux
+  safety: benign
+expected_evidence:
+  outbound_connection: required
+  inbound_accepted_connection: required
+  outbound_process_attribution: required
+  inbound_server_process_attribution: required
+  exact_direction: required
+expected_findings: []
+forbidden:
+  listener_as_connection_history: true

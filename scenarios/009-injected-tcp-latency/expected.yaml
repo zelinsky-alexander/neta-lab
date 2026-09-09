@@ -1,0 +1,21 @@
+scenario:
+  id: NETA-LAB-009
+  name: injected-tcp-latency
+  version: 1
+  category: network-assurance
+  platform: linux
+  safety: isolated_netns
+activity:
+  impairment: netem_delay
+  default_delay: 100ms
+expected_evidence:
+  tcp_rtt: required
+  process_attribution: required
+  remote_endpoint: required
+  route: optional
+expected_assurance:
+  performance: DEGRADED
+  trust: STABLE
+expected_findings: []
+negative_control:
+  baseline_connection_must_remain_normal: true
