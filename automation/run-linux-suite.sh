@@ -76,8 +76,6 @@ run_case() {
          "$script" "$TARGET_HOST" "${NETA_LAB_BURST_PORT:-18455}" "${NETA_LAB_BURST_COUNT:-250}" "${NETA_LAB_BURST_PARALLEL:-20}" >>"$log" 2>&1 || rc=$? ;;
     016) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator starts server and drives client from peer"; return ;;
     017) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator coordinates inbound and outbound peers"; return ;;
-    019) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
-         "$script" "$TARGET_HOST" >>"$log" 2>&1 || rc=$? ;;
     *)   "$script" >>"$log" 2>&1 || rc=$? ;;
   esac
 
