@@ -12,8 +12,9 @@ Usage: automation/run-linux-suite.sh [--target-host HOST] [--scenarios all|ID,ID
 
 Runs the non-interactive Linux NETA Lab scenarios and writes per-scenario logs plus
 summary.tsv and summary.json. Scenarios that require a second host to initiate an
-inbound connection (016 and the inbound half of 017) are intentionally reported
-as PEER_REQUIRED; the full-cycle orchestrator drives those two-host steps.
+inbound connection (016, the inbound half of 017, and the connected phase of 018)
+are intentionally reported as PEER_REQUIRED; the full-cycle orchestrator drives
+those two-host steps.
 
 Environment equivalents:
   NETA_LAB_TARGET_HOST   controlled peer/target host for outbound scenarios
@@ -76,6 +77,7 @@ run_case() {
          "$script" "$TARGET_HOST" "${NETA_LAB_BURST_PORT:-18455}" "${NETA_LAB_BURST_COUNT:-250}" "${NETA_LAB_BURST_PARALLEL:-20}" >>"$log" 2>&1 || rc=$? ;;
     016) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator starts server and drives client from peer"; return ;;
     017) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator coordinates inbound and outbound peers"; return ;;
+    018) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator preserves idle-listener phase, then drives one peer connection"; return ;;
     *)   "$script" >>"$log" 2>&1 || rc=$? ;;
   esac
 
