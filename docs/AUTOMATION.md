@@ -14,6 +14,6 @@ The runner writes `summary.tsv`, `summary.json`, per-scenario logs, and copies e
 
 Linux scenarios with their own local network namespace/TLS/resolver setup run directly. Scenarios that need a controlled outbound target receive `--target-host`. Windows-only scenarios 004-006 are reported as `NOT_APPLICABLE` in a Linux run.
 
-NETA-LAB-016 and NETA-LAB-017 require a second owned host to initiate the inbound side of the scenario. The local runner reports them as `PEER_REQUIRED`; `neta-coordinator/integration/aws/full-cycle.sh` supplies that peer and records a separate peer summary. This keeps the Lab runner useful on a single developer endpoint without pretending an inbound peer exists.
+NETA-LAB-016, NETA-LAB-017, and the connected phase of NETA-LAB-018 require a second owned host. The local runner reports them as `PEER_REQUIRED`; `neta-coordinator/integration/aws/full-cycle.sh` supplies that peer and records a separate peer summary. For 018 the orchestrator deliberately leaves the listener idle for the scenario's required window before initiating the one controlled peer connection. This keeps the Lab runner useful on a single developer endpoint without pretending an inbound peer exists or violating the negative-control phase.
 
 The automation layer adds no new runtime/library dependency. It uses Bash, Python 3 standard library, and the scenario tools already required by NETA Lab. Scenario `expected.yaml` files remain ground truth; automation must not reinterpret unavailable evidence as a negative observation.
