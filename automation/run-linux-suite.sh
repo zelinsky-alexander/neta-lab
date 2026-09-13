@@ -7,7 +7,7 @@ TARGET_HOST="${NETA_LAB_TARGET_HOST:-}"
 SCENARIOS="${NETA_LAB_SCENARIOS:-all}"
 
 usage() {
-  cat <<'EOF'
+  cat <<'USAGE'
 Usage: automation/run-linux-suite.sh [--target-host HOST] [--scenarios all|ID,ID,...] [--output-dir DIR] [--list]
 
 Runs the non-interactive Linux NETA Lab scenarios and writes per-scenario logs plus
@@ -20,7 +20,8 @@ Environment equivalents:
   NETA_LAB_TARGET_HOST   controlled peer/target host for outbound scenarios
   NETA_LAB_SCENARIOS     all or comma-separated numeric IDs
   NETA_LAB_OUTPUT_DIR    result directory
-EOF
+  NETA_LAB_CA_CERT       CA certificate used by TLS scenarios such as Linux 004
+USAGE
 }
 
 list_scenarios() {
@@ -67,6 +68,10 @@ run_case() {
          "$script" "$TARGET_HOST" "${NETA_LAB_HTTPS_PORT:-18443}" "${NETA_LAB_BEACON_COUNT:-12}" "${NETA_LAB_BEACON_INTERVAL:-1}" >>"$log" 2>&1 || rc=$? ;;
     003) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
          "$script" "$TARGET_HOST" "${NETA_LAB_DOWNLOAD_PORT:-18081}" "${NETA_LAB_DOWNLOAD_MIB:-50}" >>"$log" 2>&1 || rc=$? ;;
+    004) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
+         "$script" "$TARGET_HOST" "${NETA_LAB_004_PORT:-18444}" "${NETA_LAB_CA_CERT:-}" >>"$log" 2>&1 || rc=$? ;;
+    005) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
+         "$script" "$TARGET_HOST" "${NETA_LAB_005_PORT:-18580}" >>"$log" 2>&1 || rc=$? ;;
     007) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
          "$script" "$TARGET_HOST" "${NETA_LAB_UPLOAD_PORT:-18447}" >>"$log" 2>&1 || rc=$? ;;
     008) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
@@ -87,7 +92,7 @@ run_case() {
 while IFS= read -r dir; do
   base="$(basename "$dir")"; id="${base%%-*}"
   selected "$id" || continue
-  case "$id" in 004|005|006) record "$id" "NOT_APPLICABLE" 0 "Windows-only scenario" ;; *) run_case "$id" "$dir" ;; esac
+  run_case "$id" "$dir"
 done < <(find "$ROOT/scenarios" -mindepth 1 -maxdepth 1 -type d | sort)
 
 python3 - "$SUMMARY_TSV" "$OUTPUT_DIR/summary.json" <<'PY'

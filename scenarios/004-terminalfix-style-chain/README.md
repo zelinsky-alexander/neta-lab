@@ -2,196 +2,56 @@
 
 ## Purpose
 
-Emulate the first MS11 endpoint attack-chain scenario from the NETA EDR roadmap without malware, exploitation, persistence, credential access, or third-party infrastructure.
+Validate the same endpoint-causality pattern on Windows and Linux: a launcher starts a script-capable process, a benign NETA-owned artifact is downloaded, that artifact executes, and the new process performs one HTTPS callback to controlled infrastructure.
 
-The controlled chain is:
+The scenario is intentionally benign. It does not exploit software, create persistence, access credentials, modify security settings, or execute commands received from the server.
 
-```text
-test launcher (cmd.exe)
-    -> PowerShell
-    -> HTTPS download of a benign NETA-owned executable
-    -> downloaded executable starts
-    -> executable connects to the same controlled HTTPS server
-```
+## Platform semantics
 
-This scenario is designed to validate endpoint causality, not merely network activity.
-
-## Safety boundary
-
-`NETA-LAB-004` is intentionally benign:
-
-- the downloaded executable is built from source in this repository,
-- it only performs one HTTPS GET to the configured lab server,
-- it does not execute commands received from the server,
-- it does not create persistence,
-- it does not read credentials or secrets,
-- it does not modify security settings,
-- it does not exploit software,
-- it does not contact any endpoint other than the explicitly configured lab host.
-
-Run it only on systems and endpoints you own or are explicitly authorized to test.
-
-## Expected process/file/network chain
-
-For the default Windows run:
+Windows keeps the original chain:
 
 ```text
-cmd.exe
-  `-- powershell.exe
-        |-- writes downloaded file --> neta-lab-004-payload.exe
-        `-- starts --> neta-lab-004-payload.exe
-                        `-- HTTPS GET --> https://<lab-host>:18443/callback
+cmd.exe -> powershell.exe -> download benign .exe -> execute -> HTTPS callback
 ```
 
-The download itself is also HTTPS:
+Linux preserves the same causal meaning with native shell tooling:
 
 ```text
-powershell.exe
-  `-- curl.exe --> https://<lab-host>:18443/payload/neta-lab-004-payload.exe
+bash -> curl -> downloaded executable shell payload -> HTTPS callback
 ```
 
-The `curl.exe` process is an implementation detail of the safe downloader. The core causal chain to validate is launcher -> PowerShell -> downloaded executable -> controlled HTTPS connection, while preserving the intermediate download process/file evidence.
+The Linux payload is repository-authored source, served by the same controlled scenario server, written into a temporary user-writable directory, hashed, marked executable, run once, and removed automatically.
 
-## 1. Build the benign payload on Windows
+## Controlled server
 
-From the repository root in Windows PowerShell:
+The HTTPS server is `server/lab_https_server.py`. It serves exactly one selected benign payload route plus `/callback` and emits JSON-line ground truth. Its payload path and route are configurable so Windows and Linux can share one scenario ID without pretending their artifacts are identical.
 
-```powershell
-.\scenarios\004-terminalfix-style-chain\windows\build-payload.ps1
-```
+Windows retains the default route `/payload/neta-lab-004-payload.exe`. Linux full-cycle acceptance uses `/payload/neta-lab-004-payload.sh` on a separate controlled port.
 
-This produces:
-
-```text
-scenarios/004-terminalfix-style-chain/server/payload/neta-lab-004-payload.exe
-```
-
-The executable is generated from `payload/NetaLab004Payload.cs`. No prebuilt binary is committed.
-
-## 2. Create a lab TLS certificate
-
-Use a certificate whose SAN matches the hostname you will pass to `-LabHost`. For a local-only example using `neta-lab.local`, OpenSSL can be used to generate a short-lived self-signed lab certificate:
+## Linux run
 
 ```bash
-openssl req -x509 -newkey rsa:2048 -nodes -days 7 \
-  -keyout neta-lab-004-key.pem \
-  -out neta-lab-004-cert.pem \
-  -subj '/CN=neta-lab.local' \
-  -addext 'subjectAltName=DNS:neta-lab.local'
+./linux/run.sh <LAB-HOST> [port=18444] [ca-cert]
 ```
 
-Ensure the observed Windows host resolves that hostname to the controlled lab server, for example through lab DNS or an authorized hosts-file entry.
+For full-cycle acceptance the CA is supplied through `NETA_LAB_CA_CERT`. Certificate verification remains enabled. `NETA_LAB_TLS_INSECURE=1` exists only for explicitly isolated ad-hoc testing and is not used by full-cycle acceptance.
 
-## 3. Start the controlled HTTPS server
+Linux ground truth includes the run ID, download URL, temporary artifact path, and SHA-256. Required NETA semantics remain process lifecycle, parent/child causality, file creation/hash, process attribution, outbound connection evidence, and TLS identity where supported.
 
-```bash
-python3 scenarios/004-terminalfix-style-chain/server/lab_https_server.py \
-  --bind 0.0.0.0 \
-  --port 18443 \
-  --cert neta-lab-004-cert.pem \
-  --key neta-lab-004-key.pem
-```
+## Windows run
 
-The server exposes only two scenario resources:
-
-- `/payload/neta-lab-004-payload.exe` — the benign executable,
-- `/callback` — the executable's final HTTPS request.
-
-It logs independent ground-truth events as JSON lines.
-
-## 4. Run the Windows chain
-
-Copy the server certificate PEM to the Windows test host, then run through the test launcher:
-
-```cmd
-scenarios\004-terminalfix-style-chain\windows\launch.cmd -LabHost neta-lab.local -ServerCertificatePath C:\lab\neta-lab-004-cert.pem
-```
-
-Optional parameters can be passed through to `run.ps1`, including `-Port` and `-KeepDownloadedArtifact`.
-
-`-KeepDownloadedArtifact` is useful when you want to inspect the dropped executable after the run. By default the temporary scenario directory is removed after execution.
-
-## Independent ground truth
-
-The PowerShell runner prints:
-
-- scenario run ID,
-- download URL,
-- destination path,
-- downloaded artifact SHA-256,
-- child executable PID,
-- child exit code.
-
-The HTTPS server separately logs:
-
-- payload download request,
-- callback request,
-- run ID,
-- client address,
-- request timestamp.
-
-These markers exist only for validation. NETA detections must not depend on scenario headers, paths, run IDs, filenames, or the server's log markers.
-
-## Expected NETA evidence
-
-Required for a full L1 PASS when the corresponding EDR capabilities exist:
-
-- process start for the launcher,
-- process start for PowerShell,
-- parent/child relation launcher -> PowerShell,
-- file creation for the downloaded executable,
-- downloaded executable path,
-- downloaded executable SHA-256,
-- process start for the downloaded executable,
-- parent/child relation PowerShell -> downloaded executable,
-- DNS evidence for the configured lab hostname,
-- outbound connection attributed to the downloaded executable,
-- TLS identity evidence for that connection,
-- final correlated finding preserving the supporting evidence chain.
-
-Supporting evidence when available:
-
-- user/logon identity,
-- executable signer state (the lab payload is expected to be unsigned unless you explicitly sign it),
-- route/interface evidence,
-- TCP metrics,
-- first-seen executable state.
+Use the existing Windows implementation under `windows/`; it keeps the original PowerShell and benign executable behavior documented by the scenario's platform expectations.
 
 ## Expected finding
-
-The initial semantic finding is:
 
 ```text
 SCRIPTED_DOWNLOAD_EXECUTE_NETWORK_CHAIN
 ```
 
-Recommended interpretation:
+Interpretation must stay behavioral: a script-capable process downloaded an executable artifact, started it, and the new process communicated over the network. The sequence is compatible with TerminalFix/ClickFix-style delivery behavior, but malicious intent is not established by this lab.
 
-> A script-capable process downloaded an executable, started it, and the new process initiated network communication to a destination. This behavior is compatible with a TerminalFix/ClickFix-style delivery chain. Malicious intent is not established by this sequence alone.
+Detection must not key on scenario IDs, run IDs, filenames, HTTP headers, callback paths, or server ground-truth markers.
 
-The detector must correlate real endpoint evidence. It must not key on `NETA-LAB-004`, the payload filename, HTTP headers, the callback path, or other lab-only markers.
+## Safety and cleanup
 
-## Acceptance criteria
-
-```text
-launcher process observed                 PASS
-launcher -> PowerShell parent chain       PASS
-PowerShell process observed               PASS
-download connection observed              PASS
-downloaded file creation observed         PASS
-artifact SHA-256 available                PASS
-PowerShell -> payload parent chain         PASS
-payload process observed                  PASS
-payload DNS evidence                      PASS
-payload outbound connection               PASS
-payload TLS identity                      PASS
-correlated finding generated              PASS
-coordinator received evidence/finding     PASS
-portal investigation is explainable       PASS
-```
-
-If a required collector is not yet implemented, report the specific item as unsupported/not yet implemented. Do not infer file creation, artifact identity, parentage, DNS, or TLS from lab ground truth.
-
-## Cleanup
-
-By default `run.ps1` removes its temporary directory after the payload exits. With `-KeepDownloadedArtifact`, remove the printed temporary directory manually after investigation. Stop the lab HTTPS server with Ctrl+C.
+Run only against systems you own or are explicitly authorized to test. Linux temporary artifacts are removed automatically. Stop the controlled HTTPS server after the test.

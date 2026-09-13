@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Controlled HTTPS server for NETA-LAB-004.
 
-Serves one prebuilt benign payload and accepts one callback endpoint. Uses only
-Python's standard library and writes JSON-line ground truth to stdout.
+Serves one benign payload and accepts one callback endpoint. Uses only Python's
+standard library and writes JSON-line ground truth to stdout. The payload route
+is configurable so the same scenario ID can serve platform-specific payloads.
 """
 
 from __future__ import annotations
@@ -16,7 +17,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 SCENARIO_ID = "NETA-LAB-004"
-PAYLOAD_ROUTE = "/payload/neta-lab-004-payload.exe"
+DEFAULT_PAYLOAD_ROUTE = "/payload/neta-lab-004-payload.exe"
 CALLBACK_ROUTE = "/callback"
 
 
@@ -42,16 +43,17 @@ class LabHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
         parsed = urlsplit(self.path)
         run_id = self.headers.get("X-NETA-Lab-Run", "")
+        payload_route: str = self.server.payload_route  # type: ignore[attr-defined]
 
-        if parsed.path == PAYLOAD_ROUTE:
+        if parsed.path == payload_route:
             payload_path: Path = self.server.payload_path  # type: ignore[attr-defined]
             if not payload_path.is_file():
                 emit("payload_missing", self, run_id=run_id, payload=str(payload_path))
-                self.send_error(404, "Build the benign payload before running the scenario")
+                self.send_error(404, "Build or provide the benign payload before running the scenario")
                 return
 
             data = payload_path.read_bytes()
-            emit("payload_download", self, run_id=run_id, bytes=len(data))
+            emit("payload_download", self, run_id=run_id, bytes=len(data), payload_route=payload_route)
             self.send_response(200)
             self.send_header("Content-Type", "application/octet-stream")
             self.send_header("Content-Length", str(len(data)))
@@ -77,7 +79,6 @@ class LabHandler(BaseHTTPRequestHandler):
         self.send_error(404)
 
     def log_message(self, fmt: str, *args: object) -> None:
-        # Ground-truth JSON is intentionally the primary server log.
         return
 
 
@@ -92,15 +93,24 @@ def parse_args() -> argparse.Namespace:
         "--payload",
         type=Path,
         default=here / "payload" / "neta-lab-004-payload.exe",
-        help="Path to the benign executable built from repository source",
+        help="Path to the benign platform payload",
+    )
+    parser.add_argument(
+        "--payload-route",
+        default=DEFAULT_PAYLOAD_ROUTE,
+        help="HTTPS path used to serve the selected platform payload",
     )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    if not args.payload_route.startswith("/"):
+        raise SystemExit("--payload-route must start with /")
+
     httpd = ThreadingHTTPServer((args.bind, args.port), LabHandler)
     httpd.payload_path = args.payload.resolve()  # type: ignore[attr-defined]
+    httpd.payload_route = args.payload_route  # type: ignore[attr-defined]
 
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile=str(args.cert), keyfile=str(args.key))
@@ -115,6 +125,7 @@ def main() -> int:
                 "bind": args.bind,
                 "port": args.port,
                 "payload": str(httpd.payload_path),
+                "payload_route": httpd.payload_route,
             },
             sort_keys=True,
         ),

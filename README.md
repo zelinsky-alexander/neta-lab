@@ -15,9 +15,9 @@ Each scenario lives in a dedicated numbered folder and defines:
 - `NETA-LAB-001` — periodic HTTP beacon
 - `NETA-LAB-002` — periodic HTTPS beacon
 - `NETA-LAB-003` — controlled large download
-- `NETA-LAB-004` — safe TerminalFix/ClickFix-style Windows download/execute/network chain
-- `NETA-LAB-005` — safe Windows LOLBin staging chain using signed system utilities
-- `NETA-LAB-006` — suspicious process tree / process masquerading chain
+- `NETA-LAB-004` — safe scripted download -> execute -> network chain; Windows TerminalFix/ClickFix-style and Linux semantic equivalent
+- `NETA-LAB-005` — safe system-utility staging chain; Windows signed LOLBin evidence and Linux system/package provenance
+- `NETA-LAB-006` — suspicious process tree / renamed-system-binary masquerading chain on Windows and Linux
 - `NETA-LAB-007` — controlled large upload / outbound asymmetry
 - `NETA-LAB-008` — clean TCP baseline
 - `NETA-LAB-009` — injected TCP latency using isolated Linux netns/veth
@@ -39,6 +39,10 @@ Each scenario lives in a dedicated numbered folder and defines:
 IDs 011–013 are reserved by the networking/TLS lab matrix for later P1 scenarios. IDs 026–030 are reserved for Wave D inbound TLS/mTLS. IDs must not be reused.
 
 All scenarios are intentionally benign. They generate controlled endpoint/network behavior against infrastructure you own; they do not exploit software, steal credentials, or execute malicious payloads. Capability and negative-control labs may legitimately expect no security finding.
+
+## Cross-platform scenario policy
+
+A scenario ID represents one semantic behavior. When Windows and Linux need different native mechanisms, the scenario keeps the same ID and provides platform-specific implementations under `windows/` and `linux/`. Platform trust evidence must remain truthful: Windows may use Authenticode/signer identity, while Linux uses system/package provenance when available rather than fabricating Windows signing semantics.
 
 ## Repository policy
 

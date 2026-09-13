@@ -1,15 +1,16 @@
 scenario:
   id: NETA-LAB-005
-  name: lolbin-staging-chain
-  version: 1
+  name: system-utility-staging-chain
+  version: 2
   category: endpoint-chain
-  platform: windows
+  platform: cross-platform
+  platforms:
+    - windows
+    - linux
   safety: benign
 
 activity:
-  launcher: cmd.exe
-  script_process: powershell.exe
-  system_utility: certutil.exe
+  semantics: trusted_system_utility_staging_chain
   operations:
     - controlled_http_download
     - base64_encode
@@ -22,6 +23,22 @@ activity:
   credential_access: false
   privilege_transition: false
 
+platform_activity:
+  windows:
+    launcher: cmd.exe
+    script_process: powershell.exe
+    utilities:
+      - certutil.exe
+    trust_context: authenticode_signer
+  linux:
+    launcher: bash
+    script_process: bash
+    utilities:
+      - curl
+      - base64
+      - sha256sum
+    trust_context: system_package_provenance
+
 expected_evidence:
   process_lifecycle: required
   parent_child_chain: required
@@ -29,23 +46,29 @@ expected_evidence:
   file_creation: required
   executable_path: required
   file_sha256: optional
-  signer_state: required_for_full_pass
-  signer_identity: required_for_full_pass
   connection_lifecycle: required
   process_attribution: required
+  signer_state: windows_required_for_full_pass
+  signer_identity: windows_required_for_full_pass
+  package_provenance: linux_required_for_full_pass_when_collector_supported
   dns: optional
   route: optional
   tcp_metrics: optional
   first_seen_artifact: optional
 
-expected_parent_chain:
-  - parent: cmd.exe
-    child: powershell.exe
-  - parent: powershell.exe
-    child: certutil.exe
+platform_expectations:
+  windows:
+    expected_finding: SIGNED_SYSTEM_UTILITY_STAGING_CHAIN
+    trust_rule: valid_signer_must_not_suppress_behavior
+  linux:
+    expected_finding: SYSTEM_UTILITY_STAGING_CHAIN
+    trust_rule: package_or_system_provenance_must_not_suppress_behavior
+    provenance_ground_truth:
+      - package_manager_owner_when_available
+      - package_version_when_available
 
 expected_findings:
-  - type: SIGNED_SYSTEM_UTILITY_STAGING_CHAIN
+  - type: SYSTEM_UTILITY_STAGING_CHAIN
     minimum_severity: medium
     malicious_intent: unknown
     requires_capabilities:
@@ -57,9 +80,7 @@ expected_findings:
       - process_attribution
 
 validation:
-  signed_software_rule:
-    signer_is_evidence_not_allowlist: true
-    valid_signature_must_not_suppress_behavioral_finding: true
+  trust_is_context_not_allowlist: true
   detection_must_not_depend_on:
     - scenario_id
     - run_id
@@ -75,12 +96,9 @@ validation:
     - file_creation
     - connection_lifecycle
     - process_attribution
-  full_pass_also_requires:
-    - signer_state
-    - signer_identity
 
 notes:
-  - certutil.exe is deliberately used as a legitimate Windows utility exercising supported functionality in an unusual sequence.
+  - Windows uses certutil.exe and Authenticode signer evidence.
+  - Linux uses ordinary system utilities and records package-manager provenance when available; it does not invent Authenticode-style signing semantics.
   - The staged object is inert text and is never executed.
-  - NETA must derive signer and behavioral evidence independently of lab ground truth.
-  - A trusted publisher identity does not imply that the observed behavior is safe.
+  - Trusted publisher or package provenance is contextual evidence, not a behavioral allowlist.
