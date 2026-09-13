@@ -36,7 +36,7 @@ expected_evidence:
   file_creation: required
   executable_path: required
   executable_sha256: required
-  dns: required_for_full_pass
+  dns: platform_specific
   connection_lifecycle: required
   process_attribution: required
   tls_identity: required_for_full_pass
@@ -49,12 +49,14 @@ expected_evidence:
 
 platform_expectations:
   windows:
+    dns: required_for_full_pass_when_hostname_used
     parent_chain:
       - parent: cmd.exe
         child: powershell.exe
       - parent: powershell.exe
         child: neta-lab-004-payload.exe
   linux:
+    dns: optional_when_ip_target_used
     process_roles:
       - launcher_shell
       - curl_downloader
@@ -91,11 +93,11 @@ validation:
     - process_attribution
     - connection_lifecycle
   full_pass_also_requires:
-    - dns
     - tls_identity
 
 notes:
   - Windows keeps the original TerminalFix/ClickFix-style launcher and executable payload semantics.
   - Linux preserves the same causal meaning with a downloaded executable shell payload that performs one HTTPS callback.
+  - Linux full-cycle acceptance currently targets the controlled server by private IP, so DNS evidence is not fabricated as a requirement for that run.
   - Lab markers provide independent ground truth only and must never become detector features.
   - Missing endpoint evidence remains UNKNOWN/UNAVAILABLE rather than being inferred from the lab script.

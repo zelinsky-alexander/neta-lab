@@ -68,7 +68,19 @@ platform_expectations:
       - package_version_when_available
 
 expected_findings:
+  - type: SIGNED_SYSTEM_UTILITY_STAGING_CHAIN
+    platform: windows
+    minimum_severity: medium
+    malicious_intent: unknown
+    requires_capabilities:
+      - process_lifecycle
+      - parent_child_chain
+      - command_line
+      - file_creation
+      - connection_lifecycle
+      - process_attribution
   - type: SYSTEM_UTILITY_STAGING_CHAIN
+    platform: linux
     minimum_severity: medium
     malicious_intent: unknown
     requires_capabilities:

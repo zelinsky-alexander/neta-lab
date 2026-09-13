@@ -9,7 +9,7 @@ SCENARIO_ID = "NETA-LAB-005"
 STAGE_BYTES = (
     b"NETA-LAB-005 benign staging artifact\n"
     b"This deterministic text is inert and must never be executed.\n"
-    b"Purpose: validate signed-system-utility behavioral evidence.\n"
+    b"Purpose: validate system-utility behavioral evidence across supported platforms.\n"
 )
 
 
