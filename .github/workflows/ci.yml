@@ -1,0 +1,15 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  phase2-linux-fleet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Phase 2 non-root tests
+        run: ./automation/test-fleet-phase2.sh
+      - name: Existing Linux automation syntax
+        run: bash -n automation/run-linux-suite.sh

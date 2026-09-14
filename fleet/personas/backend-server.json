@@ -1,0 +1,13 @@
+{
+  "id": "backend-server",
+  "role": "backend-server",
+  "platform": "linux",
+  "hostname_prefix": "api-linux",
+  "activity": "medium-high",
+  "working_hours": "always",
+  "normal_apps": ["nginx", "java", "ssh", "postgres-client"],
+  "scenario_rate_per_hour": 0.8,
+  "scenario_weights": {"008": 10.0, "014": 2.0, "001": 0.5},
+  "threat_scenario_probability": 0.02,
+  "tenant": "lab-default"
+}

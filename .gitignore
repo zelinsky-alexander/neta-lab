@@ -3,3 +3,7 @@
 __pycache__/
 *.pyc
 scenarios/004-terminalfix-style-chain/server/payload/*.exe
+
+# Large-scale fleet lab local overrides/results
+fleet-local.json
+out/fleet-*/
