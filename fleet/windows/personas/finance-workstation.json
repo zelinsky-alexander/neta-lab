@@ -1,0 +1,13 @@
+{
+  "id": "windows-finance-workstation",
+  "role": "finance-workstation",
+  "platform": "windows",
+  "hostname_prefix": "fin-win",
+  "activity": "medium",
+  "working_hours": "business-hours",
+  "normal_apps": ["powershell.exe", "curl.exe", "whoami.exe"],
+  "scenario_rate_per_hour": 0.30,
+  "scenario_weights": {"001": 5.0, "003": 2.0, "006": 0.5},
+  "threat_scenario_probability": 0.04,
+  "tenant": "tenant-finance"
+}

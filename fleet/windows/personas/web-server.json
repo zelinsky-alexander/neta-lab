@@ -1,0 +1,13 @@
+{
+  "id": "windows-web-server",
+  "role": "web-server",
+  "platform": "windows",
+  "hostname_prefix": "web-win",
+  "activity": "medium",
+  "working_hours": "always",
+  "normal_apps": ["powershell.exe", "curl.exe"],
+  "scenario_rate_per_hour": 0.22,
+  "scenario_weights": {"001": 6.0, "003": 1.0, "006": 0.25, "007": 1.0},
+  "threat_scenario_probability": 0.03,
+  "tenant": "tenant-services"
+}
