@@ -19,3 +19,15 @@ expected_assurance:
 expected_findings: []
 negative_control:
   baseline_connection_must_remain_normal: true
+
+acceptance_contract:
+  detector:
+    required: false
+    allowed_rules: PERF-001,NET-002
+    forbidden_rules: EDR-001,EDR-002,EDR-003,TLS-001,TLS-002
+  assurance:
+    performance: DEGRADED
+    trust: STABLE
+  evidence:
+    required: true
+    target_port: 18449

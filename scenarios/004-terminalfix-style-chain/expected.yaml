@@ -101,3 +101,21 @@ notes:
   - Linux full-cycle acceptance currently targets the controlled server by private IP, so DNS evidence is not fabricated as a requirement for that run.
   - Lab markers provide independent ground truth only and must never become detector features.
   - Missing endpoint evidence remains UNKNOWN/UNAVAILABLE rather than being inferred from the lab script.
+
+acceptance_contract:
+  detector:
+    required: true
+    rule_id: EDR-001
+    semantic_type: SCRIPTED_DOWNLOAD_EXECUTE_NETWORK_CHAIN
+    minimum_severity: medium
+    allowed_statuses: ACTIVE,CANDIDATE
+    subject_type: PROCESS
+    evidence_root: required
+    ruleset_provenance: required
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent
+  evidence:
+    required: true
+    target_port: 18444
+    file_creation: required

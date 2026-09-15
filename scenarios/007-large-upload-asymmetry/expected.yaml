@@ -7,7 +7,7 @@ scenario:
 activity:
   direction: outbound
   default_port: 18447
-  upload_bytes: 33554432
+  upload_bytes: 41943040
   generated_content: true
 expected_evidence:
   connection_lifecycle: required
@@ -26,3 +26,21 @@ forbidden_assertions:
   - compromised_host
 negative_control:
   small_upload_must_not_match: true
+
+acceptance_contract:
+  detector:
+    required: true
+    rule_id: NET-005
+    semantic_type: HIGH_OUTBOUND_ASYMMETRY
+    target_port: 18447
+    minimum_severity: low
+    allowed_statuses: ACTIVE,CANDIDATE
+    evidence_root: required
+    ruleset_provenance: required
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent
+  evidence:
+    required: true
+    target_port: 18447
+    transfer: egress

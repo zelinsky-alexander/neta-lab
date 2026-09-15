@@ -20,3 +20,12 @@ validation:
   resolver_api_is_not_exact_dns_packet: true
   ambiguous_correlation_must_not_be_promoted_to_exact: true
 expected_findings: []
+
+acceptance_contract:
+  detector:
+    required: false
+    forbidden_rules: DNS-002,EDR-001,EDR-002,EDR-003,TLS-001,TLS-002
+  evidence:
+    required: true
+    target_port: 18459
+    dns: required

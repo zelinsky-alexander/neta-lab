@@ -22,3 +22,24 @@ expected_findings:
 forbidden_findings:
   - PERIODIC_OUTBOUND_CONNECTION
   - HIGH_OUTBOUND_ASYMMETRY
+
+acceptance_contract:
+  detector:
+    required: true
+    rule_id: TLS-002
+    semantic_type: TLS_IDENTITY_CHANGE
+    minimum_severity: high
+    allowed_statuses: ACTIVE,CANDIDATE
+    evidence_root: required
+    ruleset_provenance: required
+    forbidden_rules: BEH-001,NET-005
+  assurance:
+    performance: NORMAL
+    trust: CHANGED
+  evidence:
+    required: true
+    target_port: 18462
+    tls_fidelity: EXACT
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent

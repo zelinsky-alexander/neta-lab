@@ -10,4 +10,4 @@ Each scenario lives under `scenarios/NNN-name/` and should contain:
 
 Scenario IDs are immutable once published. A scenario should distinguish independent lab ground truth from NETA observations. Lab markers such as run IDs or HTTP headers must never be required by detection rules; they exist only to make validation unambiguous.
 
-Initial expected-result fields are intentionally simple and may evolve when automated validation is added.
+Every scenario also has a constrained `acceptance_contract` mapping. It declares whether a detector is required, the trusted rule and semantic type, minimum severity, permitted coordinator status, required evidence and provenance, Portal visibility, assurance state, and forbidden rules. `automation/acceptance_contracts.py` rejects malformed or incomplete contracts and emits the normalized `contracts.json` consumed by full-cycle acceptance.

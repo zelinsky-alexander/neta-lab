@@ -2,13 +2,13 @@
 set -euo pipefail
 
 if [[ $# -lt 1 || $# -gt 3 ]]; then
-  echo "Usage: $0 <host> [port=18080] [size_mib=50]" >&2
+  echo "Usage: $0 <host> [port=18080] [size_mib=300]" >&2
   exit 2
 fi
 
 host="$1"
 port="${2:-18080}"
-size_mib="${3:-50}"
+size_mib="${3:-300}"
 run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 url="http://${host}:${port}/large-download?size_mib=${size_mib}"
 tmp="$(mktemp -t neta-lab-003-XXXXXX.bin)"
