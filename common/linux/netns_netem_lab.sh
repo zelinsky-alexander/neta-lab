@@ -13,7 +13,7 @@ ip netns exec "$NS" ip addr add 10.203.0.2/30 dev "$VN"; ip netns exec "$NS" ip 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd); ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 ip netns exec "$NS" python3 "$ROOT/common/server/tcp_lab_server.py" --bind 10.203.0.2 --port "$PORT" --connections 2 --scenario "NETA-LAB-netem-$MODE" & SERVER_PID=$!
 sleep .3
-python3 "$ROOT/common/client/tcp_lab_client.py" 10.203.0.2 "$PORT" --connections 1 --upload-bytes 8388608 --hold-seconds 2 --scenario "NETA-LAB-netem-$MODE-baseline"
+python3 "$ROOT/common/client/tcp_lab_client.py" 10.203.0.2 "$PORT" --connections 1 --upload-bytes 8388608 --hold-seconds 3 --scenario "NETA-LAB-netem-$MODE-baseline"
 "$ROOT/common/linux/accept_observed_baseline.sh" "$PORT"
 if [[ $MODE == latency ]]; then tc qdisc add dev "$VH" root netem delay "$VALUE"; else tc qdisc add dev "$VH" root netem loss "$VALUE"; fi
 python3 "$ROOT/common/client/tcp_lab_client.py" 10.203.0.2 "$PORT" --connections 1 --upload-bytes 8388608 --hold-seconds 2 --scenario "NETA-LAB-netem-$MODE-impaired"

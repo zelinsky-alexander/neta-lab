@@ -12,8 +12,8 @@ ip netns add "$NS"; ip link add "$VH" type veth peer name "$VN"; ip link set "$V
 ip addr add 10.204.0.1/30 dev "$VH"; ip link set "$VH" up
 ip netns exec "$NS" ip addr add 10.204.0.2/30 dev "$VN"; ip netns exec "$NS" ip link set lo up; ip netns exec "$NS" ip link set "$VN" up
 ip netns exec "$NS" "$TLS" server "$TMP" A 10.204.0.2 "$PORT" & PID=$!; sleep .3
-"$TLS" fingerprint "$TMP" A; "$TLS" client "$TMP" 10.204.0.2 "$PORT" neta-lab.local 1 >/dev/null; echo "$SCENARIO phase=baseline identity=A"
+"$TLS" fingerprint "$TMP" A; "$TLS" client "$TMP" 10.204.0.2 "$PORT" neta-lab.local 3 >/dev/null; echo "$SCENARIO phase=baseline identity=A"
 "$ROOT/common/linux/accept_observed_baseline.sh" "$PORT" true
 tc qdisc add dev "$VH" root netem delay 120ms loss 1%
 if [[ $MODE == compound ]]; then kill "$PID"; wait "$PID" 2>/dev/null || true; ip netns exec "$NS" "$TLS" server "$TMP" B 10.204.0.2 "$PORT" & PID=$!; sleep .3; "$TLS" fingerprint "$TMP" B; ID=B; else ID=A; fi
-"$TLS" client "$TMP" 10.204.0.2 "$PORT" neta-lab.local 1 >/dev/null; echo "$SCENARIO phase=impaired identity=$ID delay=120ms loss=1%"
+"$TLS" client "$TMP" 10.204.0.2 "$PORT" neta-lab.local 2 >/dev/null; echo "$SCENARIO phase=impaired identity=$ID delay=120ms loss=1%"
