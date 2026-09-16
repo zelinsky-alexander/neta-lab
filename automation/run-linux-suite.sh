@@ -112,12 +112,17 @@ while IFS= read -r dir; do
 done < <(find "$ROOT/scenarios" -mindepth 1 -maxdepth 1 -type d | sort)
 
 python3 - "$SUMMARY_TSV" "$OUTPUT_DIR/summary.json" <<'PY'
-import csv, json, sys
-src, dst = sys.argv[1:]
-with open(src, newline='', encoding='utf-8') as f:
+import csv, json, pathlib, sys
+src, dst = map(pathlib.Path, sys.argv[1:])
+with src.open(newline='', encoding='utf-8') as f:
     rows = list(csv.DictReader(f, delimiter='\t'))
-with open(dst, 'w', encoding='utf-8') as f:
-    json.dump({"platform":"linux","results":rows}, f, indent=2)
+logs = {}
+for row in rows:
+    log_path = dst.parent / f"{row['scenario']}.log"
+    if log_path.is_file():
+        logs[row['scenario']] = log_path.read_text(encoding='utf-8', errors='replace')
+with dst.open('w', encoding='utf-8') as f:
+    json.dump({"platform":"linux","results":rows,"scenario_logs":logs}, f, indent=2)
     f.write("\n")
 PY
 
