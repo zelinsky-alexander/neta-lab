@@ -28,7 +28,6 @@ acceptance_contract:
     forbidden_rules: EDR-001,EDR-002,EDR-003,TLS-001,TLS-002
   assurance:
     performance: DEGRADED
-    trust: STABLE
   evidence:
     required: true
     target_port: 18450

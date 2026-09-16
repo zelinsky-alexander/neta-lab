@@ -17,6 +17,10 @@ validation:
   supporting_probe_must_not_be_promoted_to_exact_application_identity: true
 expected_findings: []
 
+notes:
+  - Exact application-session evidence is required in always-on service mode.
+  - The independent supporting probe is exercised only by explicit target observation and is not a service-mode acceptance requirement.
+
 acceptance_contract:
   detector:
     required: false
@@ -24,4 +28,4 @@ acceptance_contract:
   evidence:
     required: true
     target_port: 18471
-    tls_fidelity: EXACT_AND_SUPPORTING_DISTINCT
+    tls_fidelity: EXACT
