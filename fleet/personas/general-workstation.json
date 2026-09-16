@@ -1,0 +1,13 @@
+{
+  "id": "general-workstation",
+  "role": "general-workstation",
+  "platform": "linux",
+  "hostname_prefix": "user-linux",
+  "activity": "low-medium",
+  "working_hours": "08:00-18:00",
+  "normal_apps": ["browser", "ssh", "package-manager"],
+  "scenario_rate_per_hour": 0.5,
+  "scenario_weights": {"008": 9.0, "014": 1.0, "001": 1.0},
+  "threat_scenario_probability": 0.03,
+  "tenant": "lab-default"
+}

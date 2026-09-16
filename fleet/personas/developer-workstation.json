@@ -1,0 +1,13 @@
+{
+  "id": "developer-workstation",
+  "role": "developer-workstation",
+  "platform": "linux",
+  "hostname_prefix": "dev-linux",
+  "activity": "noisy",
+  "working_hours": "07:30-19:00",
+  "normal_apps": ["git", "ssh", "python", "docker", "browser"],
+  "scenario_rate_per_hour": 1.5,
+  "scenario_weights": {"008": 8.0, "014": 2.0, "001": 1.0},
+  "threat_scenario_probability": 0.04,
+  "tenant": "lab-default"
+}

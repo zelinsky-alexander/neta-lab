@@ -1,0 +1,13 @@
+{
+  "id": "windows-developer-workstation",
+  "role": "developer-workstation",
+  "platform": "windows",
+  "hostname_prefix": "dev-win",
+  "activity": "high",
+  "working_hours": "extended",
+  "normal_apps": ["powershell.exe", "cmd.exe", "curl.exe"],
+  "scenario_rate_per_hour": 0.55,
+  "scenario_weights": {"001": 4.0, "003": 2.0, "004": 0.4, "005": 0.4, "006": 1.0, "007": 1.0},
+  "threat_scenario_probability": 0.07,
+  "tenant": "tenant-engineering"
+}

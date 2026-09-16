@@ -1,0 +1,23 @@
+{
+  "name": "windows-default",
+  "state_root": "C:/ProgramData/NETA-Lab/fleet/windows-default",
+  "runtime_root": "C:/ProgramData/NETA-Lab/run/windows-default",
+  "endpoint_prefix": "win",
+  "docker_network": "neta-sim-win",
+  "subnet": "172.30.0.0/16",
+  "container_image": "mcr.microsoft.com/windows/servercore:ltsc2025",
+  "agent_binary": "../neta-agent/build-windows/Release/neta-agent.exe",
+  "pipe_name": "neta-sensor-broker",
+  "queue_capacity": 1024,
+  "seed": 82913741,
+  "agent_duration_seconds": 86400,
+  "agent_poll_ms": 100,
+  "max_db_mb": 200,
+  "heartbeat_seconds": 60,
+  "heartbeat_jitter_percent": 20,
+  "reporting_mode": "SIGNIFICANT_ONLY",
+  "min_confidence": 0.8,
+  "reporting_cooldown_seconds": 1800,
+  "scenario_max_concurrent": 8,
+  "allow_unenrolled": false
+}
