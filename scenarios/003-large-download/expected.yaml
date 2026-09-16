@@ -10,8 +10,8 @@ activity:
   transport: tcp
   direction: outbound
   connection_count: 1
-  payload_bytes: 52428800
-  payload_mib: 50
+  payload_bytes: 314572800
+  payload_mib: 300
 
 expected_evidence:
   connection_lifecycle: required
@@ -39,4 +39,22 @@ validation:
 
 notes:
   - Lab markers identify independent ground truth only and must not be used by detection rules.
-  - The detector threshold should be independent of the 50 MiB lab payload; 32 MiB is a suitable initial threshold.
+  - The 300 MiB workload exceeds the production NET-001 threshold of 256 MiB with margin.
+
+acceptance_contract:
+  detector:
+    required: true
+    rule_id: NET-001
+    semantic_type: LARGE_INGRESS_TRANSFER
+    target_port: 18081
+    minimum_severity: low
+    allowed_statuses: ACTIVE,CANDIDATE
+    evidence_root: required
+    ruleset_provenance: required
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent
+  evidence:
+    required: true
+    target_port: 18081
+    transfer: ingress

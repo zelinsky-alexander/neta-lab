@@ -15,7 +15,7 @@ CHUNK = (b"NETA-LAB-003-CONTROLLED-PAYLOAD\n" * 2048)
 
 class Handler(http.server.BaseHTTPRequestHandler):
     server_version = "NETA-Lab/003"
-    default_size_mib = 50
+    default_size_mib = 300
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
@@ -87,7 +87,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run the NETA-LAB-003 controlled download server")
     parser.add_argument("--bind", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=18080)
-    parser.add_argument("--size-mib", type=int, default=50)
+    parser.add_argument("--size-mib", type=int, default=300)
     args = parser.parse_args()
     if args.size_mib <= 0 or args.size_mib > 1024:
         parser.error("--size-mib must be between 1 and 1024")

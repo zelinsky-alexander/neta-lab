@@ -40,6 +40,8 @@ while (($#)); do
 done
 
 mkdir -p "$OUTPUT_DIR"
+python3 "$ROOT/automation/acceptance_contracts.py" \
+  --scenarios-root "$ROOT/scenarios" --output "$OUTPUT_DIR/contracts.json"
 SUMMARY_TSV="$OUTPUT_DIR/summary.tsv"
 printf 'scenario\tstatus\texit_code\tnote\n' >"$SUMMARY_TSV"
 
@@ -53,6 +55,19 @@ record() {
   printf '%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" >>"$SUMMARY_TSV"
 }
 
+run_with_tls_context() {
+  if [[ -n "${NETA_LAB_TLS_CONTEXT_PRELOAD:-}" ]]; then
+    [[ "${NETA_LAB_TLS_CONTEXT_PRELOAD}" == /* && -r "${NETA_LAB_TLS_CONTEXT_PRELOAD}" ]] || {
+      echo "NETA_LAB_TLS_CONTEXT_PRELOAD must be an absolute readable library" >&2
+      return 2
+    }
+    env LD_PRELOAD="${NETA_LAB_TLS_CONTEXT_PRELOAD}" \
+      NETA_TLS_CONTEXT_SOCKET="${NETA_LAB_TLS_CONTEXT_SOCKET:-@neta-agent-tls-service}" "$@"
+  else
+    "$@"
+  fi
+}
+
 run_case() {
   local id="$1" dir="$2" script="$dir/linux/run.sh" log="$OUTPUT_DIR/$id.log" rc=0
   if [[ ! -x "$script" ]]; then
@@ -63,13 +78,13 @@ run_case() {
   echo "=== NETA-LAB-$id ===" | tee "$log"
   case "$id" in
     001) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
-         "$script" "$TARGET_HOST" "${NETA_LAB_HTTP_PORT:-18080}" "${NETA_LAB_BEACON_COUNT:-12}" "${NETA_LAB_BEACON_INTERVAL:-1}" >>"$log" 2>&1 || rc=$? ;;
+         "$script" "$TARGET_HOST" "${NETA_LAB_HTTP_PORT:-18080}" "${NETA_LAB_BEACON_COUNT:-12}" "${NETA_LAB_BEACON_INTERVAL:-5}" >>"$log" 2>&1 || rc=$? ;;
     002) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
-         "$script" "$TARGET_HOST" "${NETA_LAB_HTTPS_PORT:-18443}" "${NETA_LAB_BEACON_COUNT:-12}" "${NETA_LAB_BEACON_INTERVAL:-1}" >>"$log" 2>&1 || rc=$? ;;
+         run_with_tls_context "$script" "$TARGET_HOST" "${NETA_LAB_HTTPS_PORT:-18443}" "${NETA_LAB_BEACON_COUNT:-12}" "${NETA_LAB_BEACON_INTERVAL:-5}" >>"$log" 2>&1 || rc=$? ;;
     003) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
-         "$script" "$TARGET_HOST" "${NETA_LAB_DOWNLOAD_PORT:-18081}" "${NETA_LAB_DOWNLOAD_MIB:-50}" >>"$log" 2>&1 || rc=$? ;;
+         "$script" "$TARGET_HOST" "${NETA_LAB_DOWNLOAD_PORT:-18081}" "${NETA_LAB_DOWNLOAD_MIB:-300}" >>"$log" 2>&1 || rc=$? ;;
     004) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
-         "$script" "$TARGET_HOST" "${NETA_LAB_004_PORT:-18444}" "${NETA_LAB_CA_CERT:-}" >>"$log" 2>&1 || rc=$? ;;
+         run_with_tls_context "$script" "$TARGET_HOST" "${NETA_LAB_004_PORT:-18444}" "${NETA_LAB_CA_CERT:-}" >>"$log" 2>&1 || rc=$? ;;
     005) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
          "$script" "$TARGET_HOST" "${NETA_LAB_005_PORT:-18580}" >>"$log" 2>&1 || rc=$? ;;
     007) [[ -n "$TARGET_HOST" ]] || { record "$id" "TARGET_REQUIRED" 2 "set --target-host"; return; }
@@ -83,6 +98,7 @@ run_case() {
     016) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator starts server and drives client from peer"; return ;;
     017) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator coordinates inbound and outbound peers"; return ;;
     018) record "$id" "PEER_REQUIRED" 0 "full-cycle orchestrator preserves idle-listener phase, then drives one peer connection"; return ;;
+    021|022|023|024|025|031) run_with_tls_context "$script" >>"$log" 2>&1 || rc=$? ;;
     *)   "$script" >>"$log" 2>&1 || rc=$? ;;
   esac
 
@@ -96,12 +112,17 @@ while IFS= read -r dir; do
 done < <(find "$ROOT/scenarios" -mindepth 1 -maxdepth 1 -type d | sort)
 
 python3 - "$SUMMARY_TSV" "$OUTPUT_DIR/summary.json" <<'PY'
-import csv, json, sys
-src, dst = sys.argv[1:]
-with open(src, newline='', encoding='utf-8') as f:
+import csv, json, pathlib, sys
+src, dst = map(pathlib.Path, sys.argv[1:])
+with src.open(newline='', encoding='utf-8') as f:
     rows = list(csv.DictReader(f, delimiter='\t'))
-with open(dst, 'w', encoding='utf-8') as f:
-    json.dump({"platform":"linux","results":rows}, f, indent=2)
+logs = {}
+for row in rows:
+    log_path = dst.parent / f"{row['scenario']}.log"
+    if log_path.is_file():
+        logs[row['scenario']] = log_path.read_text(encoding='utf-8', errors='replace')
+with dst.open('w', encoding='utf-8') as f:
+    json.dump({"platform":"linux","results":rows,"scenario_logs":logs}, f, indent=2)
     f.write("\n")
 PY
 

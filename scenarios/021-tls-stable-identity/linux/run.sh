@@ -5,4 +5,7 @@ cleanup(){ set +e; [[ -n ${PID:-} ]] && kill "$PID" 2>/dev/null; rm -rf "$TMP"; 
 "$TLS" prepare "$TMP" neta-lab.local
 "$TLS" fingerprint "$TMP" A
 "$TLS" server "$TMP" A 127.0.0.1 "$PORT" & PID=$!; sleep .3
-for i in 1 2 3; do "$TLS" client "$TMP" 127.0.0.1 "$PORT" neta-lab.local >/dev/null; echo "NETA-LAB-021 session=$i identity=A"; done
+"$TLS" client "$TMP" 127.0.0.1 "$PORT" neta-lab.local 3 >/dev/null
+echo 'NETA-LAB-021 phase=baseline identity=A'
+"$ROOT/common/linux/accept_observed_baseline.sh" "$PORT" true
+for i in 1 2; do "$TLS" client "$TMP" 127.0.0.1 "$PORT" neta-lab.local 2 >/dev/null; echo "NETA-LAB-021 phase=validation session=$i identity=A"; done

@@ -21,3 +21,15 @@ expected_assurance:
   trust: STABLE_AFTER_BASELINE_ACCEPTANCE
 forbidden_findings:
   - TLS_IDENTITY_CHANGE
+
+acceptance_contract:
+  detector:
+    required: false
+    allowed_rules: NONE
+    forbidden_rules: TLS-001,TLS-002
+  assurance:
+    trust: STABLE
+  evidence:
+    required: true
+    target_port: 18461
+    tls_fidelity: EXACT

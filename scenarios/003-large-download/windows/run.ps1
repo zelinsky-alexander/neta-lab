@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$HostAddress,
     [int]$Port = 18080,
-    [int]$SizeMiB = 50
+    [int]$SizeMiB = 300
 )
 
 $ErrorActionPreference = "Stop"
