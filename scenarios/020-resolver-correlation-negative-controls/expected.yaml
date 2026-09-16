@@ -15,4 +15,13 @@ subcases:
 validation:
   timestamp_proximity_alone_is_insufficient: true
   ambiguous_match_must_not_be_promoted: true
+  acceptance_note: aggregate ambiguity counters are not yet exported as durable per-scenario evidence
 expected_findings: []
+
+acceptance_contract:
+  detector:
+    required: false
+    forbidden_rules: DNS-002,EDR-001,EDR-002,EDR-003,TLS-001,TLS-002
+  evidence:
+    required: true
+    target_port: 18460

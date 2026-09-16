@@ -16,8 +16,8 @@ server)
   exec openssl s_server -quiet -www -accept "$ADDR:$PORT" -cert "$DIR/server-$ID.pem" -key "$DIR/server-$ID.key"
   ;;
 client)
-  DIR=${1:?dir}; ADDR=${2:-127.0.0.1}; PORT=${3:-18461}; HOST=${4:-neta-lab.local}
-  printf 'GET / HTTP/1.0\r\nHost: %s\r\n\r\n' "$HOST" | openssl s_client -quiet -verify_return_error -verify_hostname "$HOST" -servername "$HOST" -CAfile "$DIR/ca.pem" -connect "$ADDR:$PORT"
+  DIR=${1:?dir}; ADDR=${2:-127.0.0.1}; PORT=${3:-18461}; HOST=${4:-neta-lab.local}; HOLD=${5:-0}
+  { sleep "$HOLD"; printf 'GET / HTTP/1.0\r\nHost: %s\r\n\r\n' "$HOST"; } | openssl s_client -quiet -verify_return_error -verify_hostname "$HOST" -servername "$HOST" -CAfile "$DIR/ca.pem" -connect "$ADDR:$PORT"
   ;;
 fingerprint)
   DIR=${1:?dir}; ID=${2:?A-or-B}

@@ -15,3 +15,16 @@ forbidden_findings:
   - TLS_IDENTITY_CHANGE
 validation:
   transport_degradation_does_not_imply_identity_change: true
+
+acceptance_contract:
+  detector:
+    required: false
+    allowed_rules: PERF-001,NET-002
+    forbidden_rules: TLS-001,TLS-002
+  assurance:
+    performance: DEGRADED
+    trust: STABLE
+  evidence:
+    required: true
+    target_port: 18463
+    tls_fidelity: EXACT

@@ -15,3 +15,23 @@ expected_findings:
   - TLS_IDENTITY_CHANGE
 validation:
   identity_change_does_not_imply_transport_degradation: true
+
+acceptance_contract:
+  detector:
+    required: true
+    rule_id: TLS-002
+    semantic_type: TLS_IDENTITY_CHANGE
+    minimum_severity: high
+    allowed_statuses: ACTIVE,CANDIDATE
+    evidence_root: required
+    ruleset_provenance: required
+  assurance:
+    performance: NORMAL
+    trust: CHANGED
+  evidence:
+    required: true
+    target_port: 18464
+    tls_fidelity: EXACT
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent

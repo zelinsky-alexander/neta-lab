@@ -111,3 +111,13 @@ notes:
   - Linux resolves the system sh executable, copies that binary unchanged into a user-writable temporary path, and executes the renamed copy.
   - The suspicious signal is contextual: trusted/system provenance plus unusual path/name plus process ancestry and child-process behavior.
   - Network activity is deliberately absent so this scenario validates process-centric detection independently.
+  - Command execution remains covered, but EDR-003 and file evidence are not acceptance requirements until the production collectors and detector exist.
+
+acceptance_contract:
+  detector:
+    required: false
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent
+  evidence:
+    required: false

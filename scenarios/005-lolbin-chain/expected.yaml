@@ -114,3 +114,14 @@ notes:
   - Linux uses ordinary system utilities and records package-manager provenance when available; it does not invent Authenticode-style signing semantics.
   - The staged object is inert text and is never executed.
   - Trusted publisher or package provenance is contextual evidence, not a behavioral allowlist.
+  - Linux acceptance does not require an EDR-002 result until independent file-creation telemetry and the production staging-chain detector exist.
+
+acceptance_contract:
+  detector:
+    required: false
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent
+  evidence:
+    required: true
+    target_port: 18580

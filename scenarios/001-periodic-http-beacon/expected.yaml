@@ -32,3 +32,20 @@ expected_findings:
 
 notes:
   - Lab HTTP headers and run IDs are ground-truth markers only and must not be used by NETA detection rules.
+
+acceptance_contract:
+  detector:
+    required: true
+    rule_id: BEH-001
+    semantic_type: PERIODIC_OUTBOUND_CONNECTION
+    target_port: 18080
+    minimum_severity: low
+    allowed_statuses: ACTIVE,CANDIDATE
+    evidence_root: required
+    ruleset_provenance: required
+  portal:
+    visible_in_all: true
+    visible_in_active: status_dependent
+  evidence:
+    required: true
+    target_port: 18080

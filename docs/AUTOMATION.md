@@ -1,6 +1,6 @@
 # NETA Lab automation
 
-`automation/run-linux-suite.sh` is the non-interactive command runner used by the NETA full-cycle acceptance harness. Existing scenario scripts remain the canonical scenario implementations and continue to support manual debugging.
+`automation/run-linux-suite.sh` is the non-interactive command runner used by the NETA full-cycle acceptance harness. Existing scenario scripts remain the canonical scenario implementations and continue to support manual debugging. Before executing a scenario, the runner validates every constrained `acceptance_contract` section and writes the normalized catalog to `contracts.json` using only Python's standard library.
 
 Examples:
 

@@ -15,3 +15,11 @@ expected_validation:
   lifecycle_loss_counter: required
   storage_growth: report
 expected_findings: []
+
+acceptance_contract:
+  detector:
+    required: false
+    forbidden_rules: EDR-001,EDR-002,EDR-003,NET-005,TLS-001,TLS-002
+  evidence:
+    required: true
+    target_port: 18455
