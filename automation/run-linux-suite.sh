@@ -39,7 +39,7 @@ while (($#)); do
   esac
 done
 
-mkdir -p "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR/logs"
 python3 "$ROOT/automation/acceptance_contracts.py" \
   --scenarios-root "$ROOT/scenarios" --output "$OUTPUT_DIR/contracts.json"
 SUMMARY_TSV="$OUTPUT_DIR/summary.tsv"
@@ -69,7 +69,7 @@ run_with_tls_context() {
 }
 
 run_case() {
-  local id="$1" dir="$2" script="$dir/linux/run.sh" log="$OUTPUT_DIR/$id.log" rc=0
+  local id="$1" dir="$2" script="$dir/linux/run.sh" log="$OUTPUT_DIR/logs/$id.log" rc=0
   if [[ ! -x "$script" ]]; then
     if [[ -f "$script" ]]; then chmod +x "$script"; else record "$id" "NOT_APPLICABLE" 0 "no standalone Linux run.sh"; return; fi
   fi
@@ -102,7 +102,7 @@ run_case() {
     *)   "$script" >>"$log" 2>&1 || rc=$? ;;
   esac
 
-  if ((rc == 0)); then record "$id" "PASS" 0 "scenario command completed"; else record "$id" "FAIL" "$rc" "see $id.log"; fi
+  if ((rc == 0)); then record "$id" "PASS" 0 "scenario command completed; log=logs/$id.log"; else record "$id" "FAIL" "$rc" "see logs/$id.log"; fi
 }
 
 while IFS= read -r dir; do
@@ -118,7 +118,7 @@ with src.open(newline='', encoding='utf-8') as f:
     rows = list(csv.DictReader(f, delimiter='\t'))
 logs = {}
 for row in rows:
-    log_path = dst.parent / f"{row['scenario']}.log"
+    log_path = dst.parent / "logs" / f"{row['scenario']}.log"
     if log_path.is_file():
         logs[row['scenario']] = log_path.read_text(encoding='utf-8', errors='replace')
 with dst.open('w', encoding='utf-8') as f:

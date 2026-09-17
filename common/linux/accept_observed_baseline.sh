@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PORT=${1:?usage: $0 <remote-port> [require-exact-tls]}
+PORT=${1:?usage: $0 <remote-port> [require-exact-tls] [remote-address]}
 REQUIRE_EXACT_TLS=${2:-false}
+REMOTE_ADDRESS=${3:-}
 AGENT_BIN=${NETA_AGENT_BIN:-}
 AGENT_DB=${NETA_AGENT_DB:-}
 TIMEOUT_SECONDS=${NETA_BASELINE_ACCEPT_TIMEOUT_SECONDS:-30}
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ -z "$AGENT_BIN" || -z "$AGENT_DB" ]]; then
   echo "baseline acceptance not requested: NETA_AGENT_BIN/NETA_AGENT_DB are unset"
@@ -25,35 +27,23 @@ fi
 START_SECONDS=$SECONDS
 LAST_ERROR=""
 LAST_CONNECTION_ID=""
+LAST_TARGET="${REMOTE_ADDRESS:-<unresolved>}:$PORT"
+LAST_RTT_SAMPLES=0
+LAST_EXACT_TLS=false
 while (( SECONDS - START_SECONDS < TIMEOUT_SECONDS )); do
-  CONNECTION_ID=$(python3 - "$AGENT_DB" "$PORT" "$REQUIRE_EXACT_TLS" <<'PY'
-import sqlite3
-import sys
+  READINESS=()
+  mapfile -t READINESS < <(
+    python3 "$SCRIPT_DIR/baseline_readiness.py" \
+      "$AGENT_DB" "$PORT" "$REQUIRE_EXACT_TLS" "$REMOTE_ADDRESS" || true
+  )
+  CONNECTION_ID=${READINESS[0]:-}
+  LAST_TARGET=${READINESS[1]:-$LAST_TARGET}
+  LAST_RTT_SAMPLES=${READINESS[2]:-0}
+  LAST_EXACT_TLS=${READINESS[3]:-false}
+  [[ -n "$CONNECTION_ID" ]] && LAST_CONNECTION_ID=$CONNECTION_ID
 
-database, port, require_tls = sys.argv[1], int(sys.argv[2]), sys.argv[3] == "true"
-query = """
-SELECT c.id
-  FROM connections c
- WHERE c.remote_port=? AND c.direction='OUTBOUND'
-   AND EXISTS (
-       SELECT 1 FROM transport_samples s
-        WHERE s.connection_id=c.id AND s.rtt_us>0)
-   AND (?=0 OR EXISTS (
-       SELECT 1 FROM connection_tls_session_evidence t
-        WHERE t.connection_id=c.id
-          AND t.correlation_fidelity='EXACT'
-          AND t.observation_fidelity='EXACT'))
- ORDER BY c.id DESC LIMIT 1
-"""
-with sqlite3.connect(f"file:{database}?mode=ro", uri=True) as connection:
-    row = connection.execute(query, (port, int(require_tls))).fetchone()
-if row:
-    print(row[0])
-PY
-)
-
-  if [[ -n "$CONNECTION_ID" ]]; then
-    LAST_CONNECTION_ID=$CONNECTION_ID
+  if [[ -n "$CONNECTION_ID" && "$LAST_RTT_SAMPLES" -ge 5 && \
+        ( "$REQUIRE_EXACT_TLS" == "false" || "$LAST_EXACT_TLS" == "true" ) ]]; then
     if ACCEPT_OUTPUT=$("$AGENT_BIN" baseline accept-connection "$CONNECTION_ID" --db "$AGENT_DB" 2>&1); then
       [[ -n "$ACCEPT_OUTPUT" ]] && printf '%s\n' "$ACCEPT_OUTPUT"
       exit 0
@@ -64,9 +54,9 @@ PY
 done
 
 if [[ -n "$LAST_CONNECTION_ID" ]]; then
-  echo "timed out accepting observed baseline connection $LAST_CONNECTION_ID on port $PORT" >&2
+  echo "timed out accepting observed baseline connection $LAST_CONNECTION_ID target=$LAST_TARGET rtt_samples=$LAST_RTT_SAMPLES exact_tls=$LAST_EXACT_TLS" >&2
   [[ -n "$LAST_ERROR" ]] && printf 'last baseline rejection: %s\n' "$LAST_ERROR" >&2
 else
-  echo "timed out waiting for observed baseline connection on port $PORT" >&2
+  echo "timed out waiting for observed baseline connection target=$LAST_TARGET rtt_samples=$LAST_RTT_SAMPLES exact_tls=$LAST_EXACT_TLS" >&2
 fi
 exit 1

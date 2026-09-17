@@ -7,6 +7,7 @@ p.add_argument('--host', default='localhost')
 p.add_argument('--port', type=int, default=18459)
 p.add_argument('--connect-address', default='127.0.0.1')
 p.add_argument('--scenario', required=True)
+p.add_argument('--hold-seconds', type=float, default=3.0)
 a=p.parse_args()
 
 def resolve(name):
@@ -20,8 +21,12 @@ def resolve(name):
 
 def connect(addr):
     t=time.time_ns()
-    with socket.create_connection((addr,a.port),timeout=5) as s:
+    family=socket.AF_INET6 if ':' in addr else socket.AF_INET
+    with socket.socket(family,socket.SOCK_STREAM) as s:
+        s.settimeout(5)
+        s.connect((addr,a.port))
         s.sendall(b'NETA-LAB\n')
+        if a.hold_seconds: time.sleep(a.hold_seconds)
     print(json.dumps({'scenario':a.scenario,'event':'connection_ground_truth','observed_ns':t,'address':addr,'port':a.port}),flush=True)
 
 if a.mode=='lookup-only': resolve(a.host)

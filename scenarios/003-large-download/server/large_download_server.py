@@ -16,6 +16,7 @@ CHUNK = (b"NETA-LAB-003-CONTROLLED-PAYLOAD\n" * 2048)
 class Handler(http.server.BaseHTTPRequestHandler):
     server_version = "NETA-Lab/003"
     default_size_mib = 300
+    minimum_duration_seconds = 8.0
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
@@ -54,11 +55,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
         remaining = total
+        sent = 0
+        pacing_started = time.monotonic()
         try:
             while remaining > 0:
                 piece = CHUNK[: min(len(CHUNK), remaining)]
                 self.wfile.write(piece)
                 remaining -= len(piece)
+                sent += len(piece)
+                if self.minimum_duration_seconds > 0:
+                    target_elapsed = self.minimum_duration_seconds * sent / total
+                    delay = target_elapsed - (time.monotonic() - pacing_started)
+                    if delay > 0:
+                        time.sleep(delay)
             self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError):
             print(json.dumps({
@@ -88,11 +97,15 @@ def main() -> None:
     parser.add_argument("--bind", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=18080)
     parser.add_argument("--size-mib", type=int, default=300)
+    parser.add_argument("--minimum-duration-seconds", type=float, default=8.0)
     args = parser.parse_args()
     if args.size_mib <= 0 or args.size_mib > 1024:
         parser.error("--size-mib must be between 1 and 1024")
+    if args.minimum_duration_seconds < 0 or args.minimum_duration_seconds > 120:
+        parser.error("--minimum-duration-seconds must be between 0 and 120")
 
     Handler.default_size_mib = args.size_mib
+    Handler.minimum_duration_seconds = args.minimum_duration_seconds
     server = http.server.ThreadingHTTPServer((args.bind, args.port), Handler)
     print(
         f"NETA-LAB-003 server listening on http://{args.bind}:{args.port} "
